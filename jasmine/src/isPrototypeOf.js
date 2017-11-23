@@ -1,6 +1,6 @@
 /*!
  * "The Beasts of Watch And Code"
- * Improving librarySystem Out of Order v0.0.1
+ * isPrototypeOf v0.0.1
  * Copyright 2017 whitefires0 / Rick Hallett
  *
  * Freely distributable under the creative commons license.
@@ -12,25 +12,41 @@
 	/* --- Project Specification --- */
 //===============================================================================================================
 
-/*Your task is to rewrite librarySystem so that the following code works too. The only difference is that we're loading the libraries out of order (i.e. 'workBlurb' is created before its dependencies, 'name' and 'company').*/
+/*In AccountingJS 8 and 9, you learned about JavaScript's prototype system. This challenge builds on those videos.
 
-librarySystem('workBlurb', ['name', 'company'], function(name, company) {
-  return name + ' works at ' + company;
-});
+Write a function, isPrototypeOf, that works just like Object.prototype.isPrototypeOf. Since your solution will be called as a function rather than a method, the way you use it will be slightly different, but the outcome should be the same.
 
-librarySystem('name', [], function() {
-  return 'Gordon';
-});
+Obviously, don't use Object.prototype.isPrototypeOf in your solution, but feel free to use other methods on Object.prototype.
 
-librarySystem('company', [], function() {
-  return 'Watch and Code';
-});
+var canine = {
+  bark: function() {
+    console.log('bark');
+  }
+};
 
-librarySystem('workBlurb'); // 'Gordon works at Watch and Code'
+var dog = Object.create(canine);
+dog.fetch = function() {
+  console.log('fetch');
+};
 
-/*Your tests should ensure that libraries can be created out of order. They should also ensure that all the requirements from the previous challenge are still being met.
+var myDog = Object.create(dog);
+var empty = Object.create(null);
 
-In addition to the new loading order feature, your solution should ensure that the callback function for each library is run only once. So for example, even if librarySystem('workBlurb') appears 100 times in your app, the 'workBlurb' callback function should only run once. You should definitely have a test for this.*/
+// These two lines are equivalent.
+dog.isPrototypeOf(myDog);  // native function returns true
+isPrototypeOf(dog, myDog); // your function does the same
+
+// These two lines, similarly should return the same thing.
+dog.isPrototypeOf(empty);  // native function returns false
+isPrototypeOf(dog, empty); // your function does the same
+
+// This should work too.
+Object.prototype.isPrototypeOf(myDog);  // native function returns true
+isPrototypeOf(Object.prototype, myDog); // your function does the same
+
+// Also make sure that your function will work for any number of prototype links.
+isPrototypeOf(canine, myDog) // true
+As usual, post your solutions below and good luck! And write tests first!*/
     
     
 //=============================================================================================================
@@ -39,82 +55,29 @@ In addition to the new loading order feature, your solution should ensure that t
 
 /*
 Notes/ideas
-- sketch out function first
-1) it will need a way to determine whether the dependencies asked for are already in library storage (by name?) - libraryStorage should store what dependencies are required (eg array of objects), or "none"
-  - In the create case, if not in storage, the library should be created in such a way as that if the return value of the creating function requires dependencies, it stores that value as a string that can later be checked to see if it contains the names of any libraries, at which point they can be substituted for the actual values.
-2) it will need a way of preventing the creation of libraries that have already been created (e.g. using name as the identifier?) (this conditional will need to be at the beginning of our function)
+0) Rewatch Gordons videos. Read up documentation on prototypes. Make notes. This is exposing brain to more information prior to the attempt
+1) Write tests first
+2) Sketch out all ideas
+3) Above all, do not attempt problem/solution precognition - methodically try out any potential solutions and progressively refine. As soon as walls are hit, look to documentation/code for options.
+4) Don't be afraid to implement other aspects of solutions - understanding is the most important thing
+
+- use __proto__ (substitute for getPrototypeOf - not fully supported) as a property to access passed in object.prototype by name
+- new, function.prototype
+
+- Point where I fist got stuck: wondering how to check existance of prototype when length of prototype link is unknown
+    e.g. myDog.__proto__.__proto__ === canine
 */
 
-(function() {
-  //object to store appended libraries
-  var libraryOrderStorage = {};
+//test 1 = dog, myDog
+function isPrototypeOf(testedPrototype, testedObject) {
 
-  function libraryOrderSystem(libraryName, dependencies, callback) {
-    var passing = false;
-    if(passing){
-        //then don't run it again but simply an alert to user
-        console.log('This library has already been created. Here are the library contents:')
-        //along with the library content
-        //return libraryOrderStorage[libraryName];
-    
-
-    //if the library hasn't already been created, create or return the library depending on number of arguments
+    if(Object.prototype === testedObject.__proto__.__proto__.__proto__) {
+        return true;
+    }
+   
+    if(testedPrototype === testedObject.__proto__) {
+        return true;
     } else {
-        //Use Case:
-        //if arguments.length < 2 (i.e. just library name), it should return the library object
-        if (arguments.length < 2) {
-            return libraryOrderStorage[libraryName];
-        }
-
-        //Create Case (no dependencies)
-        //if no dependencies are provided, it should execute callback and store the returned library object, along with a libraryOrderStorage property that indicates dependencies are not required
-        if (dependencies.length < 1) {
-            libraryOrderStorage[libraryName] = callback();
-        
-        //Create Case (1 or more dependencies)
-        //if dependencies are present, it should execute callback and pass in the dependency library object paths, as well as create a libraryOrderStorage property that indicates dependencies are required
-        } else {
-            var dependencyLibraries = getLibrariesByName(dependencies);
-
-            //use new array in apply
-            libraryOrderStorage[libraryName] = callback.apply(this, dependencyLibraries);
-        }
-
+        return false;
     }
-
-  }
-
-    //seperate helper function to get library content
-    function getLibrariesByName(dependencies) {
-        //to get values, loop through array of dependencies and store property values in new array
-        var dependencyLibraries = [];
-        
-        for (var i = 0; i < dependencies.length; i++) {
-            dependencyLibraries.push(libraryOrderStorage[dependencies[i]])
-        }
-
-        return dependencyLibraries;
-    }
-    
-    //store librarySystem for window object access outside of IIFE
-    window.libraryOrderSystem = libraryOrderSystem;
-
-})();
-
-/*
-//Create test functions
-libraryOrderSystem('name', [], function() {
-    return 'Gordon';
-}); // runs successfully and creates object property
-
-libraryOrderSystem('company', [], function() {
-    return 'Watch and Code';
-}); // runs successfully and creates object property
-
-libraryOrderSystem('workBlurb', ['name', 'company'], function(name, company) {
-    return name + ' works at ' + company;
-}); // runs successfully and creates object property using dependecies
-
-//Use test functions
-libraryOrderSystem('workBlurb'); // ==> returns "Gordon works at Watch and Code"
-*/
+};

@@ -1,19 +1,65 @@
 describe('Project isPrototypeOf Tests', function() {
+
+//===============================================================================================================
+/* --- Test Setup --- */
+//===============================================================================================================
+
+//setup beforeEach variables for global access
+var canine, dog, myDog, empty;
+
+//before each test, create prototype chain:  Object.prototype -> canine -> dog -> myDog
+beforeEach(function() {
+  canine = {
+    bark: function() {
+      console.log('bark');
+    }
+  };
   
- /*// These two lines are equivalent.
-dog.isPrototypeOf(myDog);  // native function returns true
-isPrototypeOf(dog, myDog); // your function does the same
+  dog = Object.create(canine);
+  dog.fetch = function() {
+    console.log('fetch');
+  };
+  
+  myDog = Object.create(dog);
+  empty = Object.create(null);
+});
 
-// These two lines, similarly should return the same thing.
-dog.isPrototypeOf(empty);  // native function returns false
-isPrototypeOf(dog, empty); // your function does the same
+//===============================================================================================================
+/* --- Tests --- */
+//===============================================================================================================
 
-// This should work too.
-Object.prototype.isPrototypeOf(myDog);  // native function returns true
-isPrototypeOf(Object.prototype, myDog); // your function does the same
+it('Returns true (is prototype) when checking for object created using Object.create(/*prototype*/)', function(){
+  // These two lines are equivalent.
+  var nativeReturnsTrue = dog.isPrototypeOf(myDog);  // native function returns true
+  var testedReturnsTrue = isPrototypeOf(dog, myDog);
 
-// Also make sure that your function will work for any number of prototype links.
-isPrototypeOf(canine, myDog) // true*/
+  expect(nativeReturnsTrue).toBe(testedReturnsTrue);
+});
+
+it('Returns false (is not prototype) when checking for object created using Object.create(/*object without prototype*/)', function(){
+  // These two lines, similarly should return the same thing.
+  var nativeReturnsFalse = dog.isPrototypeOf(empty);  // native function returns false
+  var testedReturnsFalse = isPrototypeOf(dog, empty);
+
+  expect(nativeReturnsFalse).toBe(testedReturnsFalse);
+});
+
+it('Returns true when checking for the presence of the default prototype object (Object.prototype)', function(){
+  // This should work too.
+  var nativeReturnsTrue = Object.prototype.isPrototypeOf(myDog);  // native function returns true
+  var testedReturnsTrue = isPrototypeOf(Object.prototype, myDog);
+  
+  expect(nativeReturnsTrue).toBe(testedReturnsTrue);
+});
+
+it('Returns true for any number of valid prototype links', function(){
+  var nativeReturnsTrue = canine.isPrototypeOf(myDog);
+  var testedReturnsTrue = isPrototypeOf(canine, myDog);
+
+  expect(nativeReturnsTrue).toBe(testedReturnsTrue);
+});
+
+
   
 
 });
