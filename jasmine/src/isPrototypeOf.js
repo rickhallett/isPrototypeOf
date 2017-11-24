@@ -61,23 +61,99 @@ Notes/ideas
 3) Above all, do not attempt problem/solution precognition - methodically try out any potential solutions and progressively refine. As soon as walls are hit, look to documentation/code for options.
 4) Don't be afraid to implement other aspects of solutions - understanding is the most important thing
 
-- use __proto__ (substitute for getPrototypeOf - not fully supported) as a property to access passed in object.prototype by name
-- new, function.prototype
-
 - Point where I fist got stuck: wondering how to check existance of prototype when length of prototype link is unknown
     e.g. myDog.__proto__.__proto__ === canine
+    - Solution: from other peoples code attempts, found out about the use of getPrototypeOf (it is impossible without this as far as I can tell), and see both iterative (while loop) and recursive options to solve this problem
 */
 
-//test 1 = dog, myDog
-function isPrototypeOf(testedPrototype, testedObject) {
 
-    if(Object.prototype === testedObject.__proto__.__proto__.__proto__) {
-        return true;
+(function main(root){
+  function isPrototypeOf(prototypeObject, testObject) {
+    protoOfObject = Object.getPrototypeOf(testObject);
+
+    //error checking: prevents invalid parameters from screwing recursion
+    if (prototypeObject === null || undefined) {
+      throw new TypeError('function cannot accept null or undefined for prototypeObject parameter')
+    } else if (testObject === null || undefined){
+      throw new TypeError('function cannot accept null or undefined for testObject parameter')
     }
-   
-    if(testedPrototype === testedObject.__proto__) {
-        return true;
+
+    //base case for recursion
+    if (protoOfObject === null || undefined) {
+      return false;
+    }
+    
+    if (protoOfObject === prototypeObject) {
+      //if a match is found, return true and stop recursion
+      return true;
     } else {
-        return false;
+      //recursive case
+      return isPrototypeOf(prototypeObject, protoOfObject);
     }
-};
+
+  };
+
+  root.isPrototypeOf = isPrototypeOf;
+})(this);
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+  //kennyklee Solution
+  (function (){
+    function isPrototypeOf(prototype, object) {
+        var protoOfObject = Object.getPrototypeOf(object);
+
+        if ((prototype === undefined) || (prototype === null)) {
+            return new TypeError("Error");
+        }
+
+        if ((protoOfObject === undefined) || (protoOfObject === null)) {
+            return false;
+        }
+
+        if (prototype === protoOfObject) {
+            return true;
+        } else {
+            return isPrototypeOf(prototype, protoOfObject);
+        }
+    }
+
+    window.isPrototypeOf = isPrototypeOf;
+}());
+
+
+
+*/
